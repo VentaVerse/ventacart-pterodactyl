@@ -21,8 +21,18 @@ ARG PHP_VERSION=8.4
 ENV PHP_VERSION=${PHP_VERSION} \
     DEBIAN_FRONTEND=noninteractive
 
+# The oldest PHP this image may ship. Raised on 2026-10-22 for PHP2Shell
+# (CVE-2026-109618, CVE-2026-109619): unauthenticated remote code execution
+# in every PHP that serves web requests, php-fpm included, fixed upstream in
+# 8.4.27 and in Debian trixie by DSA-6574-1. PHP here is Debian's package,
+# so the fix arrives only through apt; a build that came out older than this
+# fails rather than publishing a vulnerable image.
+ARG PHP_MIN=8.4.27
+
 # Node comes from Debian: trixie's 20.19 is the oldest release Vite 7 accepts.
+# upgrade as well as install, so nothing in the base system lags either.
 RUN apt-get update \
+ && apt-get upgrade -y --no-install-recommends \
  && apt-get install -y --no-install-recommends \
       ca-certificates curl git unzip tini tzdata nginx nodejs npm \
       php${PHP_VERSION}-cli php${PHP_VERSION}-fpm php${PHP_VERSION}-mysql \
@@ -32,7 +42,11 @@ RUN apt-get update \
  && rm -rf /var/lib/apt/lists/* /etc/nginx/sites-enabled/default \
  && ln -s /usr/sbin/php-fpm${PHP_VERSION} /usr/local/sbin/php-fpm \
  && git config --system --add safe.directory '*' \
- && useradd -m -d /home/container -s /bin/bash container
+ && useradd -m -d /home/container -s /bin/bash container \
+ && v="$(php -r 'echo PHP_VERSION;')" \
+ && { php -r "exit(version_compare('$v', '${PHP_MIN}', '>=') ? 0 : 1);" \
+      || { echo "PHP $v is older than the security floor ${PHP_MIN}. Refusing to build."; exit 1; }; } \
+ && echo "PHP $v, at or above ${PHP_MIN}."
 
 COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
 COPY rootfs/ /

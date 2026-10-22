@@ -11,6 +11,10 @@ on:
       - "yolk/**"
       - ".github/workflows/yolk.yml"
   workflow_dispatch:
+  # Weekly, from scratch, so Debian's security fixes reach the image without
+  # anybody remembering to rebuild it (PHP2Shell, DSA-6574-1, 2026-10-21).
+  schedule:
+    - cron: "37 3 * * 1"
 
 permissions:
   contents: read
@@ -41,6 +45,12 @@ jobs:
           platforms: linux/amd64,linux/arm64
           build-args: PHP_VERSION=${{ matrix.php }}
           push: true
+          # Always start from the current debian:trixie-slim.
+          pull: true
+          # Every build but a push skips the layer cache: with it on, an
+          # unchanged Dockerfile reused the old apt layer and a "rebuild"
+          # re-published the same vulnerable PHP.
+          no-cache: ${{ github.event_name != 'push' }}
           tags: |
             ghcr.io/${{ github.repository_owner }}/ventacart-yolk:php${{ matrix.php }}
             ghcr.io/${{ github.repository_owner }}/ventacart-yolk:php${{ matrix.php }}-${{ github.sha }}
