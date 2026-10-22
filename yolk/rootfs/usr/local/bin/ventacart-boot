@@ -121,14 +121,16 @@ artisan package:discover >/dev/null || fail "VentaCart did not boot. See storage
 # migration runs, so the answer is about the database as it was found.
 #
 #   fresh     no migration has ever run here: set the store up.
-#   partial   migrations ran but there are no users: a first start that
-#             stopped partway. Not carried on. VentaCart tells a new database
-#             from a running store by every migration having run in one
-#             batch, so a second attempt reads as a running store and sets
-#             the extensions from choices nobody made.
-#   existing  a store with people in it: never re-seeded, its admin never
-#             replaced.
-state=$(artisan tinker --execute='try { DB::connection()->getPdo(); $ran = Schema::hasTable("migrations") && DB::table("migrations")->exists(); $people = Schema::hasTable("users") && DB::table("users")->exists(); echo "STATE=", ! $ran ? "fresh" : ($people ? "existing" : "partial"); } catch (Throwable $e) { echo "STATE=nodb ", $e->getMessage(); }' 2>&1 | grep -o 'STATE=.*' | tail -n1)
+#   partial   migrations ran but this script never finished setting the
+#             store up: a first start that stopped partway. Not carried on.
+#             VentaCart tells a new database from a running store by every
+#             migration having run in one batch, so a second attempt reads as
+#             a running store and sets the extensions from choices nobody made.
+#   existing  a store this script finished setting up (the install marker),
+#             or one with people in it from before the marker existed: never
+#             re-seeded. A finished store may have no users yet, since the
+#             first admin is created in the browser.
+state=$(artisan tinker --execute='try { DB::connection()->getPdo(); $ran = Schema::hasTable("migrations") && DB::table("migrations")->exists(); $done = (Schema::hasTable("settings") && DB::table("settings")->where("group", "install")->where("key", "seeded_at")->exists()) || (Schema::hasTable("users") && DB::table("users")->exists()); echo "STATE=", ! $ran ? "fresh" : ($done ? "existing" : "partial"); } catch (Throwable $e) { echo "STATE=nodb ", $e->getMessage(); }' 2>&1 | grep -o 'STATE=.*' | tail -n1)
 state=${state#STATE=}
 
 case "$state" in
@@ -139,12 +141,11 @@ fresh)
     say "New store: installing VentaCart ..."
     artisan migrate --force || fail "Migrations failed; the reason is just above. The database now holds a half-built store: empty it (Databases tab, delete and create again) before the next start."
     artisan db:seed --force || fail "Seeding failed; the reason is just above."
-    # The seeder's first admin comes with a known password. It is replaced
-    # at once with the one this server was created with, so there is never
-    # an admin / password login.
-    updated=$(artisan tinker --execute='echo "UPDATED=", DB::table("users")->where("username", "admin")->update(["email" => getenv("ADMIN_EMAIL"), "password" => Hash::make(getenv("ADMIN_PASSWORD"))]);' 2>&1 | grep -o 'UPDATED=[0-9]*' | tail -n1)
-    [ "$updated" = "UPDATED=1" ] || fail "Could not set the admin's email and password."
-    say "Sign in to the admin as admin, with the password set on this server. Its email is ${ADMIN_EMAIL}."
+    # Marks the store as set up, so a restart before anyone has opened the
+    # admin is still a running store, not a first start that stopped.
+    marked=$(artisan tinker --execute='DB::table("settings")->insertOrIgnore(["group" => "install", "key" => "seeded_at", "value" => now()->toDateTimeString(), "created_at" => now(), "updated_at" => now()]); echo "MARKED=", DB::table("settings")->where("group", "install")->where("key", "seeded_at")->exists() ? 1 : 0;' 2>&1 | grep -o 'MARKED=[0-9]*' | tail -n1)
+    [ "$marked" = "MARKED=1" ] || fail "Could not mark the store as installed."
+    say "Open the site address and go to the admin to create the admin account."
     ;;
 existing)
     # A running store is never migrated behind its owner's back. Some of

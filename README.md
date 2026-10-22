@@ -44,10 +44,10 @@ build; only the result is kept.
 **Every start:** optionally pull the latest code, rebuild the CSS and JS if
 the code changed, discover packages, build Laravel's caches.
 
-**A new database:** run every migration, seed (order statuses, geography,
-the default theme, email templates, the essential extensions), then give the
-seeded admin the email and password the server was created with. There is
-never an `admin` / `password` login.
+**A new database:** run every migration and seed (order statuses, geography,
+the default theme, email templates, the essential extensions). No admin is
+seeded, so there is never a known default login: the first person to open the
+admin creates the admin account there.
 
 **A store that has been running:** new migrations are **reported, not run.**
 Some of VentaCart's migrations cannot be undone, and a store may owe one-off
@@ -90,8 +90,7 @@ a container**: `127.0.0.1` is the container itself, not the node.
      minute). **Disk:** 5 GB, more for a large catalogue of photos.
    - **Database limit:** 1
    - **Allocation:** any free port
-   - **Variables:** *Admin email*, *Admin password* (12 characters or more),
-     the *GitHub token*. Set *Site address* to `http://<node address>:<port>`.
+   - **Variables:** the *GitHub token*. Set *Site address* to `http://<node address>:<port>`.
      Leave the database fields empty for now.
    - Untick **Start server when installed**.
 4. Wait for the install to finish. The console shows
@@ -102,9 +101,10 @@ a container**: `127.0.0.1` is the container itself, not the node.
    sees the password.
 6. **Start.** The first start runs every migration and seeds, so give it a
    minute or two. It is ready when the console says `VentaCart is ready`.
-7. Open the site address and go to `/admin`. Sign in as **admin** with the
-   password set on the server. The email set on the server is the admin's
-   address for password resets and notices; the sign-in itself is by username.
+7. Open the site address and go to `/admin` straight away. The first visit
+   shows **Create your admin account**: an email (for password resets), a
+   username (what you sign in with) and a password. After that, `/admin` is
+   the normal sign in page.
 
 ## A domain with HTTPS
 

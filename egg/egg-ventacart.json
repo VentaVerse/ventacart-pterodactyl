@@ -4,7 +4,7 @@
         "version": "PTDL_v2",
         "update_url": null
     },
-    "exported_at": "2026-09-22T18:46:25+00:00",
+    "exported_at": "2026-10-22T12:49:21+00:00",
     "name": "VentaCart",
     "author": "pao2pao16@gmail.com",
     "description": "A VentaCart store: nginx, PHP, the queue worker and the scheduler in one server. The console runs artisan commands.",
@@ -28,26 +28,6 @@
         }
     },
     "variables": [
-        {
-            "name": "Admin email",
-            "description": "The first admin's email, applied once when the store is created. The admin signs in as admin, not with this email.",
-            "env_variable": "ADMIN_EMAIL",
-            "default_value": "",
-            "user_viewable": true,
-            "user_editable": false,
-            "rules": "required|email|max:191",
-            "field_type": "text"
-        },
-        {
-            "name": "Admin password",
-            "description": "The first admin's password, applied once when the store is created.",
-            "env_variable": "ADMIN_PASSWORD",
-            "default_value": "",
-            "user_viewable": false,
-            "user_editable": false,
-            "rules": "required|string|min:12|max:191",
-            "field_type": "text"
-        },
         {
             "name": "Site address",
             "description": "The address people open, with http:// or https://. The node address and port to begin with, the domain once one points here.",

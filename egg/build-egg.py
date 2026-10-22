@@ -30,12 +30,6 @@ def var(name, env, description, default="", rules="nullable|string", viewable=Tr
 
 
 VARIABLES = [
-    var("Admin email", "ADMIN_EMAIL",
-        "The first admin's email, applied once when the store is created. The admin signs in as admin, not with this email.",
-        rules="required|email|max:191"),
-    var("Admin password", "ADMIN_PASSWORD",
-        "The first admin's password, applied once when the store is created.",
-        rules="required|string|min:12|max:191", viewable=False),
     var("Site address", "APP_URL",
         "The address people open, with http:// or https://. The node address and port to begin with, the domain once one points here.",
         default="http://127.0.0.1", rules="required|url|max:191"),
