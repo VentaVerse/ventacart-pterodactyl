@@ -47,12 +47,11 @@ jobs:
           push: true
           # Always start from the current debian:trixie-slim.
           pull: true
-          # Every build but a push skips the layer cache: with it on, an
-          # unchanged Dockerfile reused the old apt layer and a "rebuild"
-          # re-published the same vulnerable PHP.
-          no-cache: ${{ github.event_name != 'push' }}
+          # Never reuse a layer. The apt layer is where PHP comes from, and a
+          # cached one republishes whatever PHP was current when it was made:
+          # an unchanged Dockerfile, or a push that only touched rootfs/,
+          # would ship the old, vulnerable PHP again.
+          no-cache: true
           tags: |
             ghcr.io/${{ github.repository_owner }}/ventacart-yolk:php${{ matrix.php }}
             ghcr.io/${{ github.repository_owner }}/ventacart-yolk:php${{ matrix.php }}-${{ github.sha }}
-          cache-from: type=gha,scope=php${{ matrix.php }}
-          cache-to: type=gha,mode=max,scope=php${{ matrix.php }}

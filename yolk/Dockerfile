@@ -30,9 +30,9 @@ ENV PHP_VERSION=${PHP_VERSION} \
 ARG PHP_MIN=8.4.27
 
 # Node comes from Debian: trixie's 20.19 is the oldest release Vite 7 accepts.
-# upgrade as well as install, so nothing in the base system lags either.
+# full-upgrade as well as install, so nothing in the base system lags either.
 RUN apt-get update \
- && apt-get upgrade -y --no-install-recommends \
+ && apt-get full-upgrade -y \
  && apt-get install -y --no-install-recommends \
       ca-certificates curl git unzip tini tzdata nginx nodejs npm \
       php${PHP_VERSION}-cli php${PHP_VERSION}-fpm php${PHP_VERSION}-mysql \
