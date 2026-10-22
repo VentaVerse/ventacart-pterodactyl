@@ -7,7 +7,7 @@ Two pieces:
 
 | | what | where |
 |---|---|---|
-| **Runtime image** | PHP 8.4, php-fpm, nginx, composer, git, Node 20. No VentaCart code. | `ghcr.io/pao2pao16/ventacart-yolk:php8.4`, built by Actions for amd64 and arm64 |
+| **Runtime image** | PHP 8.4, php-fpm, nginx, composer, git, Node 20. No VentaCart code. | `ghcr.io/ventaverse/ventacart-yolk:php8.4`, built by Actions for amd64 and arm64 |
 | **Egg** | Installs VentaCart into the server and starts it | `egg/egg-ventacart.json` |
 
 ## How it runs

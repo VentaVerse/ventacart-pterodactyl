@@ -13,7 +13,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-IMAGE = "ghcr.io/pao2pao16/ventacart-yolk:php8.4"
+IMAGE = "ghcr.io/ventaverse/ventacart-yolk:php8.4"
 
 
 def var(name, env, description, default="", rules="nullable|string", viewable=True, editable=False):
